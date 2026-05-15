@@ -32,6 +32,7 @@ public class MessagePersistenceService {
             messageRepository.save(message);
         } catch (Exception e) {
             log.error("保存消息到数据库失败: sessionId={}, role={}", sessionId, role, e);
+            // Make failure non-fatal to avoid transaction rollback
         }
     }
 }

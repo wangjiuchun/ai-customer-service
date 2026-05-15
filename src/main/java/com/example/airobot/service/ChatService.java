@@ -81,7 +81,8 @@ public class ChatService {
 
         // Step 0: 意图识别
         IntentRecognitionService.Recognition intentRecognition = intentRecognitionService.recognize(request.getMessage());
-        if (intentRecognition.result == IntentRecognitionService.IntentResult.RECOGNIZED
+        if ((intentRecognition.result == IntentRecognitionService.IntentResult.RECOGNIZED
+                || intentRecognition.result == IntentRecognitionService.IntentResult.LOW_CONFIDENCE)
                 && intentRecognition.intention != null
                 && intentRecognition.intention.getResponseTemplate() != null
                 && !intentRecognition.intention.getResponseTemplate().isBlank()) {
