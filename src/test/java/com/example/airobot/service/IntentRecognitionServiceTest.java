@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,6 +20,9 @@ class IntentRecognitionServiceTest {
 
     @Autowired
     private IntentionRepository intentionRepository;
+
+    @MockBean
+    private MiniMaxService miniMaxService;
 
     @BeforeEach
     void setUp() {
@@ -39,5 +43,6 @@ class IntentRecognitionServiceTest {
         assertEquals(IntentRecognitionService.IntentResult.RECOGNIZED, result.result);
         assertNotNull(result.intention);
         assertEquals("product_inquiry", result.intention.getName());
+        assertEquals(1.0, result.confidence);
     }
 }

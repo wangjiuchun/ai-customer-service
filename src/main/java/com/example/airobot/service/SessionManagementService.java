@@ -27,14 +27,6 @@ public class SessionManagementService {
     private final ChatSessionRepository sessionRepository;
 
     private static final String SESSION_KEY_PREFIX = "ai-chat:session:";
-    private static final String SYSTEM_PROMPT = """
-            你是一个专业的AI智能客服助手。请遵循以下规则：
-            1. 用友好、专业的态度回复客户
-            2. 回答简洁明了，不超过200字
-            3. 如果无法回答客户问题，建议转人工客服
-            4. 不要编造虚假信息
-            5. 适当使用emoji让对话更生动（但不要过度）
-            """;
 
     @Value("${chat.session-ttl:30}")
     private int sessionTtl;
@@ -71,7 +63,7 @@ public class SessionManagementService {
                 .build();
 
         // 初始化系统提示
-        newContext.addUserMessage(SYSTEM_PROMPT);
+        newContext.addUserMessage(ConversationContext.SYSTEM_PROMPT);
 
         // 保存会话到数据库
         saveSessionToDb(newContext);

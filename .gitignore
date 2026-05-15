@@ -1,0 +1,6 @@
+
+*.md
+app.log
+*.class
+/src/test/
+/target/
