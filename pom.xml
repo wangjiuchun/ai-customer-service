@@ -90,6 +90,13 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Dotenv (加载 .env 文件) -->
+        <dependency>
+            <groupId>com.github.codemonstur</groupId>
+            <artifactId>spring-boot-dotenv</artifactId>
+            <version>1.4.2</version>
+        </dependency>
     </dependencies>
     
     <build>

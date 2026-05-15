@@ -21,7 +21,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/ai_customer?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
-    password: ${MYSQL_PASSWORD:root}
+    password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
@@ -42,7 +42,7 @@ spring:
 
 # MiniMax API 配置
 minimax:
-  api-key: ${MINIMAX_API_KEY:REPLACE_WITH_REAL_KEY}
+  api-key: ${MINIMAX_API_KEY}
   base-url: https://api.minimax.chat
   # 使用最新的 M2.7 模型，或根据你的 Token Plan 支持的模型选择
   model: MiniMax-M2.7
@@ -54,8 +54,8 @@ minimax:
 
 # Chroma 配置
 chroma:
-  host: ${CHROMA_HOST:localhost}
-  port: ${CHROMA_PORT:8000}
+  host: ${CHROMA_HOST}
+  port: ${CHROMA_PORT}
   collection-name: faq-knowledge
 
 # 对话配置
