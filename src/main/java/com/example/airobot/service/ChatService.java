@@ -33,6 +33,7 @@ public class ChatService {
     private final MessagePersistenceService messagePersistenceService;
     private final QuickQuestionRepository quickQuestionRepository;
     private final RAGService ragService;
+    private final IntentRecognitionService intentRecognitionService;
 
     @Value("${chat.max-turns:20}")
     private int maxTurns;
@@ -45,13 +46,15 @@ public class ChatService {
                        SessionManagementService sessionManagementService,
                        MessagePersistenceService messagePersistenceService,
                        QuickQuestionRepository quickQuestionRepository,
-                       RAGService ragService) {
+                       RAGService ragService,
+                       IntentRecognitionService intentRecognitionService) {
         this.miniMaxService = miniMaxService;
         this.miniMaxConfig = miniMaxConfig;
         this.sessionManagementService = sessionManagementService;
         this.messagePersistenceService = messagePersistenceService;
         this.quickQuestionRepository = quickQuestionRepository;
         this.ragService = ragService;
+        this.intentRecognitionService = intentRecognitionService;
     }
 
     /**
@@ -76,17 +79,34 @@ public class ChatService {
         messagePersistenceService.saveMessage(context.getSessionId(), "user", request.getMessage(), context.getTurn());
         sessionManagementService.updateSessionTurn(context.getSessionId(), context.getTurn());
 
+        // Step 0: 意图识别
+        IntentRecognitionService.Recognition intentRecognition = intentRecognitionService.recognize(request.getMessage());
+        if (intentRecognition.result == IntentRecognitionService.IntentResult.RECOGNIZED
+                && intentRecognition.intention != null
+                && intentRecognition.intention.getResponseTemplate() != null
+                && !intentRecognition.intention.getResponseTemplate().isBlank()) {
+            String reply = intentRecognition.intention.getResponseTemplate();
+            context.addAssistantMessage(reply);
+            messagePersistenceService.saveMessage(context.getSessionId(), "assistant", reply, context.getTurn());
+            sessionManagementService.saveSession(context);
+            return ChatResponse.builder()
+                    .sessionId(context.getSessionId())
+                    .reply(reply)
+                    .timestamp(LocalDateTime.now())
+                    .turn(context.getTurn())
+                    .suggestions(generateSuggestions(context))
+                    .transferToHuman(false)
+                    .build();
+        }
+
         // Step 1: 检索相关 FAQ
         List<FaqKnowledge> relevantFaqs = ragService.retrieve(request.getMessage(), 3);
 
         // Step 2: 构建消息列表 (添加增强 Prompt)
-        List<MiniMaxRequest.Message> messages;
-        if (!relevantFaqs.isEmpty()) {
-            String enhancedPrompt = ragService.buildEnhancedPrompt(request.getMessage(), relevantFaqs);
-            messages = buildMessagesWithEnhancedPrompt(context, enhancedPrompt);
-        } else {
-            messages = buildMessages(context);
-        }
+        String systemPrompt = relevantFaqs.isEmpty()
+                ? ConversationContext.SYSTEM_PROMPT
+                : ragService.buildEnhancedPrompt(request.getMessage(), relevantFaqs);
+        List<MiniMaxRequest.Message> messages = buildMessages(context, systemPrompt);
 
         // Step 3: 调用 AI
         String reply = miniMaxService.chat(messages);
@@ -138,35 +158,13 @@ public class ChatService {
     /**
      * 构建发送给 AI 的消息列表
      */
-    private List<MiniMaxRequest.Message> buildMessages(ConversationContext context) {
+    private List<MiniMaxRequest.Message> buildMessages(ConversationContext context, String systemPrompt) {
         List<MiniMaxRequest.Message> messages = new ArrayList<>();
 
         // 添加系统提示
         messages.add(MiniMaxRequest.Message.builder()
                 .role("system")
-                .content(getSystemPrompt())
-                .build());
-
-        // 限制上下文长度
-        List<MiniMaxRequest.Message> history = context.getMessages();
-        int startIndex = Math.max(1, history.size() - miniMaxConfig.getContextSize());
-        for (int i = startIndex; i < history.size(); i++) {
-            messages.add(history.get(i));
-        }
-
-        return messages;
-    }
-
-    /**
-     * 构建带增强 Prompt 的消息列表
-     */
-    private List<MiniMaxRequest.Message> buildMessagesWithEnhancedPrompt(ConversationContext context, String enhancedPrompt) {
-        List<MiniMaxRequest.Message> messages = new ArrayList<>();
-
-        // 添加系统提示 (使用增强后的 prompt)
-        messages.add(MiniMaxRequest.Message.builder()
-                .role("system")
-                .content(enhancedPrompt)
+                .content(systemPrompt)
                 .build());
 
         // 限制上下文长度
@@ -223,14 +221,4 @@ public class ChatService {
                 .build();
     }
 
-    private String getSystemPrompt() {
-        return """
-            你是一个专业的AI智能客服助手。请遵循以下规则：
-            1. 用友好、专业的态度回复客户
-            2. 回答简洁明了，不超过200字
-            3. 如果无法回答客户问题，建议转人工客服
-            4. 不要编造虚假信息
-            5. 适当使用emoji让对话更生动（但不要过度）
-            """;
-    }
 }
