@@ -22,7 +22,7 @@ public class ApiResponse<T> {
     /**
      * 状态码
      */
-    private int code;
+    private String code;
 
     /**
      * 消息
@@ -42,7 +42,7 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> success(T data) {
         return ApiResponse.<T>builder()
                 .success(true)
-                .code(200)
+                .code("200")
                 .message("操作成功")
                 .data(data)
                 .timestamp(System.currentTimeMillis())
@@ -52,7 +52,7 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> success(String message, T data) {
         return ApiResponse.<T>builder()
                 .success(true)
-                .code(200)
+                .code("200")
                 .message(message)
                 .data(data)
                 .timestamp(System.currentTimeMillis())
@@ -62,14 +62,14 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> error(String message) {
         return ApiResponse.<T>builder()
                 .success(false)
-                .code(500)
+                .code("500")
                 .message(message)
                 .data(null)
                 .timestamp(System.currentTimeMillis())
                 .build();
     }
 
-    public static <T> ApiResponse<T> error(int code, String message) {
+    public static <T> ApiResponse<T> error(String code, String message) {
         return ApiResponse.<T>builder()
                 .success(false)
                 .code(code)
@@ -82,7 +82,7 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> error(String code, String message, T data) {
         return ApiResponse.<T>builder()
                 .success(false)
-                .code(400)
+                .code(code)
                 .message(message)
                 .data(data)
                 .timestamp(System.currentTimeMillis())

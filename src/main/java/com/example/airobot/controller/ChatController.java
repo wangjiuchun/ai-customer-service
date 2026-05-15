@@ -5,6 +5,7 @@ import com.example.airobot.model.ChatResponse;
 import com.example.airobot.service.ChatService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -16,6 +17,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/chat")
 @CrossOrigin(origins = "*")
+@Validated
 public class ChatController {
 
     private final ChatService chatService;
@@ -39,13 +41,8 @@ public class ChatController {
         log.info("收到对话请求: sessionId={}, userId={}, message={}",
                 request.getSessionId(), request.getUserId(), request.getMessage());
 
-        try {
-            ChatResponse response = chatService.chat(request);
-            return ApiResponse.success(response);
-        } catch (Exception e) {
-            log.error("处理对话请求失败", e);
-            return ApiResponse.error("处理失败: " + e.getMessage());
-        }
+        ChatResponse response = chatService.chat(request);
+        return ApiResponse.success(response);
     }
 
     /**
@@ -60,13 +57,8 @@ public class ChatController {
             @RequestParam(required = false) String userId) {
         log.info("获取欢迎消息: sessionId={}, userId={}", sessionId, userId);
 
-        try {
-            ChatResponse response = chatService.getWelcomeMessage(sessionId, userId);
-            return ApiResponse.success(response);
-        } catch (Exception e) {
-            log.error("获取欢迎消息失败", e);
-            return ApiResponse.error("获取失败: " + e.getMessage());
-        }
+        ChatResponse response = chatService.getWelcomeMessage(sessionId, userId);
+        return ApiResponse.success(response);
     }
 
     /**
@@ -78,13 +70,8 @@ public class ChatController {
     public ApiResponse<String> clearSession(@PathVariable String sessionId) {
         log.info("清除会话: sessionId={}", sessionId);
 
-        try {
-            chatService.clearSession(sessionId);
-            return ApiResponse.success("会话已清除");
-        } catch (Exception e) {
-            log.error("清除会话失败", e);
-            return ApiResponse.error("清除失败: " + e.getMessage());
-        }
+        chatService.clearSession(sessionId);
+        return ApiResponse.success("会话已清除");
     }
 
     /**

@@ -31,9 +31,9 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
         e.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            if (error instanceof FieldError fieldError) {
+                errors.put(fieldError.getField(), error.getDefaultMessage());
+            }
         });
         log.warn("参数校验失败: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
