@@ -4,12 +4,14 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
  * MiniMax API 配置
  */
 @Data
+@Validated
 @Configuration
 @ConfigurationProperties(prefix = "minimax")
 public class MiniMaxConfig {

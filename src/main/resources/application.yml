@@ -42,7 +42,7 @@ spring:
 
 # MiniMax API 配置
 minimax:
-  api-key: ${MINIMAX_API_KEY:}
+  api-key: ${MINIMAX_API_KEY:REPLACE_WITH_REAL_KEY}
   base-url: https://api.minimax.chat
   # 使用最新的 M2.7 模型，或根据你的 Token Plan 支持的模型选择
   model: MiniMax-M2.7
