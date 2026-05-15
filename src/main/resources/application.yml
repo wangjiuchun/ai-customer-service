@@ -1,0 +1,74 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ai-customer-service
+  
+  # Redis 配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+  
+  # MySQL 数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/ai_customer?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: ${MYSQL_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  # JPA 配置
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+# MiniMax API 配置
+minimax:
+  api-key: ${MINIMAX_API_KEY:}
+  base-url: https://api.minimax.chat
+  # 使用最新的 M2.7 模型，或根据你的 Token Plan 支持的模型选择
+  model: MiniMax-M2.7
+  # 对话上下文保留消息数
+  context-size: 10
+  # 生成参数
+  temperature: 1
+  max-tokens: 1024
+
+# Chroma 配置
+chroma:
+  host: ${CHROMA_HOST:localhost}
+  port: ${CHROMA_PORT:8000}
+  collection-name: faq-knowledge
+
+# 对话配置
+chat:
+  # Redis 中会话过期时间（分钟）
+  session-ttl: 30
+  # 最大对话轮次
+  max-turns: 20
+  # 欢迎语
+  welcome-message: "您好！我是AI智能客服，很高兴为您服务。请问有什么可以帮您的？"
+
+# 日志配置
+logging:
+  level:
+    com.example.airobot: DEBUG
+    org.springframework.web: INFO
